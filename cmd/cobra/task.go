@@ -100,6 +100,40 @@ func init() {
 	// mark flags as mutually exclusive
 	rootCmd.MarkFlagsMutuallyExclusive("dir", "taskfile")
 
+	executor := task.Executor{
+		Force:       false,
+		Watch:       false,
+		Verbose:     false,
+		Silent:      true,
+		Dir:         "", // TODO handle dir/entrypoints
+		Dry:         true,
+		Entrypoint:  "",
+		Summary:     false,
+		Parallel:    false,
+		Color:       false,
+		Concurrency: 0,
+		Interval:    0,
+		Stdin:       os.Stdin,
+		Stdout:      os.Stdout,
+		Stderr:      os.Stderr,
+
+		OutputStyle: output,
+	}
+
+	var filter = func(tasks []*taskfile.Task) []*taskfile.Task { return tasks }
+	// executor.ListTaskNames(true)
+	executor.Setup()
+	for _, task := range executor.GetTaskList(filter) {
+		var cmdEcho = &cobra.Command{
+			Use:   task.Name(),
+			Short: task.Desc,
+			Args:  argsCustomValidator,
+			Run:   run,
+		}
+		rootCmd.AddCommand(cmdEcho)
+	}
+	// create add commands here
+
 }
 
 func main() {
