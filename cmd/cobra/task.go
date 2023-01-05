@@ -62,7 +62,8 @@ var (
 			generates:
 				- output.txt
 	'''`,
-		Run: run,
+		Args: argsCustomValidator,
+		Run:  run,
 	}
 )
 
@@ -105,6 +106,18 @@ func main() {
 	Execute()
 }
 
+func argsCustomValidator(cmd *cobra.Command, args []string) error {
+	if output.Name != "group" {
+		if output.Group.Begin != "" {
+			return fmt.Errorf("task: You can't set --output-group-begin without --output=group")
+		}
+		if output.Group.End != "" {
+			return fmt.Errorf("task: You can't set --output-group-end without --output=group")
+		}
+	}
+	return nil
+}
+
 func run(cmd *cobra.Command, arguments []string) {
 	log.SetFlags(0)
 	log.SetOutput(os.Stderr)
@@ -128,17 +141,6 @@ func run(cmd *cobra.Command, arguments []string) {
 	if entrypoint != "" {
 		dir = filepath.Dir(entrypoint)
 		entrypoint = filepath.Base(entrypoint)
-	}
-
-	if output.Name != "group" {
-		if output.Group.Begin != "" {
-			log.Fatal("task: You can't set --output-group-begin without --output=group")
-			return
-		}
-		if output.Group.End != "" {
-			log.Fatal("task: You can't set --output-group-end without --output=group")
-			return
-		}
 	}
 
 	executor := task.Executor{
