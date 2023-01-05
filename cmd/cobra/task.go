@@ -96,6 +96,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&color, "color", "c", true, "colored output. Enabled by default. Set flag to false or use NO_COLOR=1 to disable")
 	rootCmd.PersistentFlags().IntVarP(&concurrency, "concurrency", "C", 0, "limit number tasks to run concurrently")
 	rootCmd.PersistentFlags().DurationVarP(&interval, "interval", "I", 0, "interval to watch for changes")
+	// mark flags as mutually exclusive
+	rootCmd.MarkFlagsMutuallyExclusive("dir", "taskfile")
 
 }
 
@@ -123,10 +125,6 @@ func run(cmd *cobra.Command, arguments []string) {
 		return
 	}
 
-	if dir != "" && entrypoint != "" {
-		log.Fatal("task: You can't set both --dir and --taskfile")
-		return
-	}
 	if entrypoint != "" {
 		dir = filepath.Dir(entrypoint)
 		entrypoint = filepath.Base(entrypoint)
